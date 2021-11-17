@@ -34,7 +34,8 @@ The MUSIC pseudospectrum `ps` is a function of an angle.
 5. Plot the pseudospectrum and observe the peaks at the source locations.
 
 ```phi = range(-pi/2, pi/2, length=1000)
-plot(phi, ps.(phi)```
+plot(phi, ps.(phi)
+```
 
 6. Find the exact peak locations:
 
@@ -43,7 +44,8 @@ plot(phi, ps.(phi)```
 7. Use a classic beamformer to estimate the location of a single source.
 
 ```S = Simulation(a, 100e6, s3)
-cbf(S, 10, 1000)```
+cbf(S, 10, 1000)
+```
 
 8. Calculate the array beamwidth:
 
