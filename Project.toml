@@ -3,6 +3,9 @@ uuid = "ae188e79-86ce-45a9-86d5-e24ed72d1b85"
 authors = ["Miguel Bazdresch <miguelb@2pif.info> and contributors"]
 version = "0.1.0"
 
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+
 [compat]
 julia = "1.6"
 
