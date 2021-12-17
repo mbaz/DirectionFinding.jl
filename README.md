@@ -1,55 +1,66 @@
 # DirectionFinding
 
-Tools for direction of arrival estimation in antenna arrays.
+Tools for direction of arrival estimation in antenna arrays. Examples using classic beamforming and MUSIC on several array topologies are found in the `simulations` directory.
 
-1. Define the array by specifying the distance of each antenna to a reference point.
-Only linear arrays are supported at the moment.
+Example:
 
-`a = LinearArray(-12, -9, -6, -3, 0, 3, 6, 9, 12`)`
+1. Specify carrier frequency and wavelength
 
-2. Define the sources. Each source is located at an angle measured from the line
-perpendicular to the array's reference point. The source also specifies a baseband
-signal and a signa-to-noise ratio.
+```fc = 1e9
+λ = 299.79e6/fc
+```
 
-`s1 = Source(pi/8, x->ComplexF64(1), 30)`
+2. Define the antenna array. For example, a circular array with 11 antennas centered on the
+origin (which is the array's reference point), with radius `2λ`, is specified as:
 
-specifies a source at an angle of pi/8, with lowpass signal equal to 1, and
-operating at SNR = 30 dB.
+`ca = circulararray(11, 2λ, σ²=0.0001)`
 
-`s2 = Source(-pi/4, x->ComplexF64(1), 30)`
+The parameter `σ²=0.0001` introduces a random, Gaussian variation of variance `σ²` in the antenna positions.
 
-`s3 = Source(pi/2.1, x->ComplexF64(1), 30)`
+2. Define the signal sources. Each source is located at an angle measured from a horizontal line that extends from the array's reference point towards +infinity.
 
-3. Specify a simulation with one array and a set of sources, operating at a given
-carrier frequency.
+```
+a1 = 0.95; a2 = 6;
+s1 = SignalSource(a1, halfsine_train(1e6))
+s2 = SignalSource(a2, halfsine_train(1e6))
+```
 
-`S = Simulation(a, 100e6, s1, s2)`
+Each source is specified by its angle, and by the baseband signal it generates (here, a train of half-sine pulses at rate 1 MBd.)
 
-4. Run MUSIC on the simulation with sampling frequency 10 and 100 snapshots.
+2. Specify the noise power density at each receiver.
 
-`ps = MUSIC(S, 10, 100)`
+`N₀ = 0.1`
 
-The MUSIC pseudospectrum `ps` is a function of an angle.
+3. Specify a simulation with one array, carrier frequency, noise density, and a set of sources:
+
+`sim = Simulation(ca, fc, N₀, s1, s2)`
+
+4. Run MUSIC on the simulation with sampling frequency `2.00001e6` and 1000 snapshots.
+
+`mps = MUSIC(sim, 2.00001e6, 1000)`
+
+The MUSIC pseudospectrum `mps` is a function of an angle.
 
 5. Plot the pseudospectrum and observe the peaks at the source locations.
 
 ```phi = range(-pi/2, pi/2, length=1000)
-plot(phi, ps.(phi)
+plot(phi, mps.(phi)
 ```
 
-6. Find the exact peak locations:
+6. Find the exact peak locations. This function returns the `n` largest peaks:
 
-`findpeaks(ps, phi)`
+`findpeaks(mps, phi, n=2)`
 
-7. Use a classic beamformer to estimate the location of a single source.
+7. Alternatively use a classic beamformer to estimate the location of a single source.
 
-```S = Simulation(a, 100e6, s3)
-cbf(S, 10, 1000)
+```
+sim = Simulation(a, 2.00001e6, s1)
+cbf(sim, 2.000013e6, 1000)
 ```
 
-8. Calculate the array beamwidth:
+8. Calculate the array beamwidth (only accurate for linear arrays):
 
-`beamwidth(S)`
+`beamwidth(sim)`
 
 or
 
